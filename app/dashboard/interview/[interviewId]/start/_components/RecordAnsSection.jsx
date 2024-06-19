@@ -80,7 +80,7 @@ function RecordAnsSection({mockInterviewQuestion, activeQuestionIndex, interview
           })
 
           if(resp){
-            toast.success('Answer Recorder successfully');
+            toast.success('Answer saved successfully');
             setUserAnswer('');
             setResults([]);
           }else {
