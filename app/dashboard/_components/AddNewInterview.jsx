@@ -10,7 +10,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
-import { chatSession } from '@/utils/gemini-ai'; // Ensure chatSession is correctly imported
+import { chatSession } from '@/utils/gemini-ai';
 import { LoaderCircle } from 'lucide-react';
 import { db } from '@/utils/db';
 import { MockInterview } from '@/utils/schema';
@@ -25,59 +25,46 @@ function AddNewInterview() {
     const [jobDesc, setJobDesc] = useState("");
     const [yearsOfExperience, setYearsOfExperience] = useState("");
     const [loading, setLoading] = useState(false);
+    const [jsonResponse, setJsonResponse] = useState([]);
+    const [error, setError] = useState(null);
     const router = useRouter();
     const { user } = useUser();
 
     const onSubmit = async (e) => {
         setLoading(true);
+        setError(null);
         e.preventDefault();
         console.log(jobPosition, jobDesc, yearsOfExperience);
 
         const InputPrompt = `Job Position: ${jobPosition}, Job Description: ${jobDesc}, Years of Experience: ${yearsOfExperience}. Based on these details, provide ${process.env.NEXT_PUBLIC_INTERVIEW_QUESTION_COUNT || 5} interview questions along with answers in JSON format.`;
 
-        try {
-            const result = await chatSession.sendMessage(InputPrompt);
-            const responseText = await result.response.text();
-            
-            const jsonMatch = responseText.match(/```json\s*([\s\S]*?)\s*```/);
-            let parsedResponse = null;
-            if (jsonMatch && jsonMatch[1]) {
-                const jsonResponse = jsonMatch[1];
-                console.log("Extracted JSON:", jsonResponse); // Debugging line
-                parsedResponse = JSON.parse(jsonResponse);
-                console.log(parsedResponse);
-            } else {
-                throw new Error("JSON format not found in response");
-            }
+        const result = await chatSession.sendMessage(InputPrompt);
+        const MockJsonResp = (result.response.text()).replace('```json','').replace('```','');
+        console.log(JSON.parse(MockJsonResp));
+        setJsonResponse(MockJsonResp)
 
-            if (parsedResponse) {
-                const resp = await db.insert(MockInterview)
-                    .values({
-                        mockId: uuidv4(),
-                        jsonMockResp: parsedResponse,
-                        jobPosition: jobPosition,
-                        jobDesc: jobDesc,
-                        jobExperience: yearsOfExperience,
-                        createdBy: user?.primaryEmailAddress?.emailAddress ?? 'unknown',
-                        createdAt: moment().format('MMMM Do YYYY, h:mm:ss a')
-                    })
-                    .returning({
-                        mockId: MockInterview.mockId,
-                    });
-
-                console.log("Inserted ID:", resp);
-                if (resp) {
-                    setOpenDialog(false);
-                    router.push(`/dashboard/interview/${resp[0]?.mockId}`);
-                }
-            } else {
-                console.log("No response received");
+        if(MockJsonResp){
+        const resp = await db.insert(MockInterview)
+        .values({
+            mockId: uuidv4(),
+            jsonMockResp: MockJsonResp,
+            jobPosition: jobPosition,
+            jobDesc: jobDesc,
+            jobExperience: yearsOfExperience,
+            createdBy: user?.primaryEmailAddress?.emailAddress,
+            createdAt: moment().format('YYYY-MM-DD'),
+        }).returning({mockId:MockInterview.mockId});
+        
+        console.log("Inserted ID:" , resp)
+            if(resp){
+                setOpenDialog(false);
+                router.push('/dashboard/interview/'+resp[0]?.mockId)
             }
-        } catch (error) {
-            console.error('Error generating interview questions:', error);
-        } finally {
-            setLoading(false);
         }
+        else{
+            console.log("Error in inserting data") 
+        }
+        setLoading(false);
     };
 
     return (
@@ -115,6 +102,7 @@ function AddNewInterview() {
                                             onChange={(event) => setYearsOfExperience(event.target.value)}
                                         />
                                     </div>
+                                    {error && <p className="text-red-500">{error}</p>}
                                 </div>
                                 <div className='flex gap-5 justify-end'>
                                     <Button type="button" variant="ghost" onClick={() => setOpenDialog(false)}>Cancel</Button>
