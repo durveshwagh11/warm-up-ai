@@ -3,12 +3,25 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint",
-    "db:push": "npx drizzle-kit push",
-    "db:studio": "npx drizzle-kit studio"
+    "dev": "npm run dev:frontend",
+    "dev:frontend": "cd frontend && next dev",
+    "dev:backend": "cd backend && npm run start:dev",
+    "build": "npm run build:frontend && npm run build:backend",
+    "build:frontend": "cd frontend && next build",
+    "build:backend": "cd backend && npm run build",
+    "start": "npm run start:frontend",
+    "start:frontend": "cd frontend && next start",
+    "start:backend": "cd backend && npm start",
+    "lint": "npm run lint:frontend && npm run lint:backend",
+    "lint:frontend": "cd frontend && next lint",
+    "lint:backend": "cd backend && eslint \"src/**/*.{ts,tsx}\"",
+    "lint:fix": "npm run lint:fix:frontend && npm run lint:fix:backend",
+    "lint:fix:frontend": "cd frontend && next lint --fix",
+    "lint:fix:backend": "cd backend && eslint \"src/**/*.{ts,tsx}\" --fix",
+    "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,css,md}\"",
+    "format:check": "prettier --check \"**/*.{js,jsx,ts,tsx,json,css,md}\"",
+    "db:push": "cd backend && npm run db:push",
+    "db:studio": "cd backend && npm run db:studio"
   },
   "dependencies": {
     "@clerk/nextjs": "^5.1.5",
@@ -37,8 +50,19 @@
     "uuid": "^10.0.0"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.3.5",
+    "@typescript-eslint/eslint-plugin": "^8.62.0",
+    "@typescript-eslint/parser": "^8.62.0",
     "drizzle-kit": "^0.22.7",
+    "eslint": "^8.57.1",
+    "eslint-config-next": "^14.2.35",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.6",
+    "nodemon": "^3.1.14",
     "postcss": "^8",
-    "tailwindcss": "^3.4.1"
+    "prettier": "^3.8.5",
+    "tailwindcss": "^3.4.1",
+    "tsx": "^4.22.4",
+    "typescript": "^6.0.3"
   }
 }

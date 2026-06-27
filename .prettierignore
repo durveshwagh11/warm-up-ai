@@ -1,0 +1,12 @@
+node_modules/
+**/node_modules/
+dist/
+.next/
+out/
+build/
+coverage/
+*.lock
+package-lock.json
+*.log
+.env*
+!.env.example

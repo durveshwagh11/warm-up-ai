@@ -1,0 +1,12 @@
+{
+  "root": true,
+  "ignorePatterns": [
+    "node_modules/",
+    "dist/",
+    ".next/",
+    "out/",
+    "build/",
+    "frontend/",
+    "backend/"
+  ]
+}
